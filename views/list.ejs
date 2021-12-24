@@ -10,15 +10,15 @@
         <h1><%=listTitle%></h1>
     </div>
     <div class="box">
-        <% for(var i=0;i<newItems.length;i++){%>
+        <% newItems.forEach(function(ele){%>
             <form action="/delete" method="post">
                 <div class="item">
-                    <input type="checkbox" name="checkbox" value=<%= newItems[i]._id%> onChange="this.form.submit()">
-                    <p><%=newItems[i].name%></p>
+                    <input type="checkbox" name="checkbox" value=<%= ele._id%> onChange="this.form.submit()">
+                    <p><%=ele.name%></p>
                 </div>
                 <input type="hidden" name="listName" value=<%-listTitle%>></input>
             </form>
-        <%} %>
+        <%}) %>
         <form class="item" action="/" method="post">
             <input type="text" name="new" placeholder="Add New Item" autocomplete="off">
             <button type="submit" name="list" value=<%=listTitle%>>+</button>

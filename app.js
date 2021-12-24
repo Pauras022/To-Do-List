@@ -12,7 +12,7 @@ app.use(express.static("public"));
 
 app.set('view engine', 'ejs');
 
-mongoose.connect("mongodb://localhost:27017/todolistDB", { useNewUrlParser: true });
+mongoose.connect("mongodb+srv://pauras22:host123@cluster0.v1nol.mongodb.net/todolistDB?retryWrites=true&w=majority", { useNewUrlParser: true });
 
 const itemSchema = {
     name: String,
@@ -56,7 +56,12 @@ app.get('/', function (req, res) {
 app.get("/:listName", function (req, res) {
     const customListName = _.capitalize(req.params.listName);
     List.findOne({ name: customListName }, function (err, result) {
-        if (result) {
+        console.log(result);
+        if (result!=null) {
+            if(result.items.length==0){
+                result.items=result.items.concat(defItems);
+                result.save();
+            }
                 res.render("list", { listTitle: result.name, newItems: result.items });
         } else {
             const list = new List({
@@ -64,7 +69,7 @@ app.get("/:listName", function (req, res) {
                 items: defItems,
             })
             list.save();
-            res.render("list", { listTitle: list.name, newItems: list.items });
+            res.redirect("/"+customListName);
         }
     })
 })
@@ -72,25 +77,26 @@ app.get("/:listName", function (req, res) {
 app.post("/", function (req, res) {
 
     var todoitem = req.body.new;
+    console.log(req.body);
     const listName = req.body.list;
     const newitem = new Item({
         name: todoitem,
     })
-    if (listName == day) {
+    if (listName == "Friday," || listName == "Saturday," || listName == "Sunday," || listName == "Monday," || listName == "Tuesday," || listName == "Wednesday," || listName == "Thursday,"  ) {
         newitem.save();
         res.redirect("/");
     } else {
         List.findOne({ name: listName }, function (err, foundList) {
             foundList.items.push(newitem);
             foundList.save();
+            res.redirect("/" + listName);
         })
-        res.redirect("/" + listName);
     }
 })
 
 app.post("/delete", function (req, res) {
     const listName = req.body.listName;
-    if (listName == day) {
+    if (listName == "Friday," || listName == "Saturday," || listName == "Sunday," || listName == "Monday," || listName == "Tuesday," || listName == "Wednesday," || listName == "Thursday,"  ) {
         Item.deleteOne({ _id: req.body.checkbox }, function (err) {
             if (err) {
                 console.log(err);
@@ -102,6 +108,8 @@ app.post("/delete", function (req, res) {
         List.findOneAndUpdate({ name: listName }, { $pull: { items: { _id: req.body.checkbox } } }, function (err, result) {
             if (!err) {
                 res.redirect("/" + listName);
+            }else{
+                console.log(err);
             }
         })
     }
